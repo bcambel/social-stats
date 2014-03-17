@@ -1,10 +1,15 @@
 (ns social-stats.core
+  (:use compojure.core)
   (:require
     [clojure.string :as s]
     [clj-http.client :as client]
     [cheshire.core :as json]
     [taoensso.timbre :as timbre]
-    [clojure.java.io :as io])
+    [clojure.java.io :as io]
+    [compojure.handler :as handler]
+    [compojure.route :as route]
+    [ring.adapter.jetty :as jetty]
+    )
   (:gen-class)
   (:import (com.fasterxml.jackson.core JsonParseException)))
 
@@ -55,10 +60,21 @@
             (info (format "%s: [%s][%s]" url tweet-count fb-count))))))))
 
 
+;(read-file file-to-read)
+
+(defroutes app-routes
+   (GET "/" []
+        "Hello")
+   (route/resources "/")
+   (route/not-found "Sorry. The path you're looking for Not Found")
+   )
+
+(def app
+  (handler/site app-routes))
+
 (defn -main
-  "I don't do a whole lot ... yet."
   [& args]
-  (println "Hello, World!")
-  ;(read-file (first args))
-  (read-file file-to-read))
+  (let [port (first args)]
+    (jetty/run-jetty app {:port (Integer. port) :join? false})
+    ))
 
