@@ -25,6 +25,7 @@
   (let [raw-resp (client/get
                    twitter-url
                    {:query-params { "url" url} } )]
+    (warn url)
     (if-let [json-result
           (try
             (json/parse-string (get raw-resp :body))
@@ -63,8 +64,18 @@
 ;(read-file file-to-read)
 
 (defroutes app-routes
-   (GET "/" []
-        "Hello")
+   (GET "/:url" [url]
+        {
+          :status 200
+          :body
+                  (json/generate-string
+                    {
+                      :twitter (str (tweets url) )
+                      :facebook (str (facebook-popularity url) )
+                 })
+          }
+        )
+
    (route/resources "/")
    (route/not-found "Sorry. The path you're looking for Not Found")
    )
